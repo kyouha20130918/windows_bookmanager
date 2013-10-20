@@ -361,6 +361,9 @@ $panel.Controls.Add($buttonClose)
 
 function saveImage() {
 param([int]$left, [int]$top, [int]$width, [int]$height, [String]$opath)
+if($width -le 0) {
+    return
+}
 $rect = New-Object Drawing.Rectangle( $left, $top, $width, $height)
 $imgBmp = New-Object Drawing.Bitmap($img)
 $bmp = $imgBmp.Clone($rect, $imgBmp.PixelFormat)
