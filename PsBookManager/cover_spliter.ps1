@@ -78,6 +78,14 @@ $hscroll.Location = New-Object Drawing.Point($offsetleft, $offsettop)
 return $hscroll
 }
 
+function makeCheckbox() {
+param([int]$offsetleft, [int]$offsettop)
+$checkbox = New-Object Windows.Forms.CheckBox
+$checkbox.Location = New-Object Drawing.Point($offsetleft, $offsettop)
+$checkbox.Checked = $true
+return $checkbox
+}
+
 $vscr_width = $vscr_handlewidth
 $vscr_height = ($imgheight + $vscr_handleheight * 2 + $vscr_markerheight + 1)
 
@@ -155,6 +163,27 @@ $panel.Controls.Add($hscrollsleeverighttop)
 $hscr_offsettop = ($heightupper + $imgheight + 1 + $vscr_handleheight * 5)
 $hscrollsleeverightbottom = makeHscrollBar $hscr_initvalue $hscr_width $hscr_height $hscr_offsetleft $hscr_offsettop
 $panel.Controls.Add($hscrollsleeverightbottom)
+
+$chk_offsetleft = ($widthleft - ($hscr_handlewidth + $vscr_handlewidth * 3 + 1))
+$chk_offsettop = ($heightupper + $imgheight + 1 + $vscr_handleheight * 0.5)
+$chksleeveleft = makeCheckbox $chk_offsetleft $chk_offsettop
+$panel.Controls.Add($chksleeveleft)
+
+$chk_offsettop = ($heightupper + $imgheight + 1 + $vscr_handleheight * 1.5)
+$chkcoverleft = makeCheckbox $chk_offsetleft $chk_offsettop
+$panel.Controls.Add($chkcoverleft)
+
+$chk_offsettop = ($heightupper + $imgheight + 1 + $vscr_handleheight * 2.5)
+$chkbackface = makeCheckbox $chk_offsetleft $chk_offsettop
+$panel.Controls.Add($chkbackface)
+
+$chk_offsettop = ($heightupper + $imgheight + 1 + $vscr_handleheight * 3.5)
+$chkcoverright = makeCheckbox $chk_offsetleft $chk_offsettop
+$panel.Controls.Add($chkcoverright)
+
+$chk_offsettop = ($heightupper + $imgheight + 1 + $vscr_handleheight * 4.5)
+$chksleeveright = makeCheckbox $chk_offsetleft $chk_offsettop
+$panel.Controls.Add($chksleeveright)
 
 $event_vscrolltopchanged = $false
 $event_vscrollbottomchanged = $false
@@ -359,18 +388,20 @@ $winform.Close()
 $buttonClose.Location = New-Object Drawing.Point(10, ($heightupper + $imgheight))
 $panel.Controls.Add($buttonClose)
 
+$imgBmp = $null
+
 function saveImage() {
 param([int]$left, [int]$top, [int]$width, [int]$height, [String]$opath)
 if($width -le 0) {
     return
 }
 $rect = New-Object Drawing.Rectangle( $left, $top, $width, $height)
-$imgBmp = New-Object Drawing.Bitmap($img)
 $bmp = $imgBmp.Clone($rect, $imgBmp.PixelFormat)
 if(Test-Path $opath) {
     Remove-Item $opath
 }
 $bmp.save($opath)
+$bmp.Dispose()
 }
 
 $buttonExec = New-Object Windows.Forms.Button
@@ -383,30 +414,45 @@ $top = $vscrolltopleft.Value
 $height = ($vscrollbottomleft.Value - $top + 1)
 $bpath = (Split-Path (Split-Path $imgPath -Parent) -Parent)
 
+$imgBmp = New-Object Drawing.Bitmap($img)
+$img.Dispose()
+
+if($chksleeveleft.Checked) {
 $left = $hscrolledgelefttop.Value + 1
 $width = ($hscrollsleevelefttop.Value - $left + 1)
 $opath = $bpath + "\C03.png"
 saveImage $left $top $width $height $opath
+}
 
+if($chkcoverleft.Checked) {
 $left = $hscrollsleevelefttop.Value + 1
 $width = ($hscrollcoverlefttop.Value - $left + 1)
 $opath = $bpath + "\C01.png"
 saveImage $left $top $width $height $opath
+}
 
+if($chkbackface.Checked) {
 $left = $hscrollcoverlefttop.Value + 1
 $width = ($hscrollbackfacetop.Value - $left + 1)
 $opath = $bpath + "\B00.png"
 saveImage $left $top $width $height $opath
+}
 
+if($chkcoverright.Checked) {
 $left = $hscrollbackfacetop.Value + 1
 $width = ($hscrollcoverrighttop.Value - $left + 1)
 $opath = $bpath + "\C02.png"
 saveImage $left $top $width $height $opath
+}
 
+if($chksleeveright.Checked) {
 $left = $hscrollcoverrighttop.Value + 1
 $width = ($hscrollsleeverighttop.Value - $left + 1)
 $opath = $bpath + "\C04.png"
 saveImage $left $top $width $height $opath
+}
+
+$winform.Close()
 })
 $buttonExec.Location = New-Object Drawing.Point(10, ($heightupper + $imgheight + 30))
 $panel.Controls.Add($buttonExec)
